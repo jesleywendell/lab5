@@ -16,9 +16,17 @@ Laboratório final da Unidade I. O objetivo é conectar a arquitetura Transforme
 
 ## Dependências
 
+**macOS/Linux:**
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+pip install torch datasets transformers
+```
+
+**Windows:**
+```bat
+python -m venv .venv
+.venv\Scripts\activate
 pip install torch datasets transformers
 ```
 
@@ -80,3 +88,5 @@ Generated : Zwei junge weiße Männer sind im Freien in der Nähe vieler Büsche
 ## Ferramentas de IA
 
 Conforme exigido pelo enunciado: IA generativa foi utilizada como auxílio na implementação das Tarefas 1 e 2 (carregamento do dataset e tokenização). O fluxo de Forward/Backward da Tarefa 3 interage estritamente com as classes construídas nos laboratórios anteriores.
+
+OBS: Ferramenta de IA (Claude) foi usada exclusivamente como auxílio, em especial para melhor compreensão do dataset e revisão de código.
