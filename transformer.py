@@ -1,16 +1,15 @@
+import os
+import importlib.util
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
+_lab4_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lab4", "transformer.py")
+_spec = importlib.util.spec_from_file_location("lab4_transformer", _lab4_path)
+_lab4 = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_lab4)
 
-class ScaledDotProductAttention(nn.Module):
-    def forward(self, Q, K, V, mask=None):
-        d_k = Q.shape[-1]
-        scores = (Q @ K.transpose(-2, -1)) / (d_k ** 0.5)
-        if mask is not None:
-            scores = scores + mask
-        weights = F.softmax(scores, dim=-1)
-        return weights @ V, weights
+scaled_dot_product_attention = _lab4.scaled_dot_product_attention
+feed_forward = _lab4.feed_forward
 
 
 class MultiHeadAttention(nn.Module):
@@ -24,8 +23,6 @@ class MultiHeadAttention(nn.Module):
         self.W_k = nn.Linear(d_model, d_model, bias=False)
         self.W_v = nn.Linear(d_model, d_model, bias=False)
         self.W_o = nn.Linear(d_model, d_model, bias=False)
-
-        self.attention = ScaledDotProductAttention()
 
     def split_heads(self, x):
         B, T, _ = x.shape
@@ -42,7 +39,7 @@ class MultiHeadAttention(nn.Module):
         if mask is not None and mask.dim() == 2:
             mask = mask.unsqueeze(0).unsqueeze(0)
 
-        out, _ = self.attention(Q, K, V, mask)
+        out, _ = scaled_dot_product_attention(Q, K, V, mask)
         out = out.transpose(1, 2).contiguous().view(B, -1, self.num_heads * self.d_k)
         return self.W_o(out)
 
@@ -54,7 +51,8 @@ class FeedForward(nn.Module):
         self.linear2 = nn.Linear(d_ff, d_model)
 
     def forward(self, x):
-        return self.linear2(F.relu(self.linear1(x)))
+        return feed_forward(x, self.linear1.weight.T, self.linear1.bias,
+                            self.linear2.weight.T, self.linear2.bias)
 
 
 class EncoderBlock(nn.Module):
